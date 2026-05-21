@@ -1,5 +1,5 @@
-# Render.com — deploy không Docker (Native Node)
-# Dashboard: New → Blueprint hoặc Web Service, trỏ repo này.
+# Render.com — Native Node (FREE hay sleep, không khuyên cho Socket.IO)
+# Xem DEPLOY.md: Fly.io / VPS / Railway Hobby ổn định hơn.
 
 services:
   - type: web
