@@ -10,7 +10,7 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         PORT: 4001,
-        CLIENT_ORIGIN: "18.142.168.12",
+        CLIENT_ORIGIN: "http://18.142.168.12",
         CORS_ORIGIN: "*",
       },
     },
