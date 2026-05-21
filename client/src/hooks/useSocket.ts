@@ -22,6 +22,7 @@ import {
 } from "../utils/playerName";
 import { getOrCreateSessionId } from "../utils/session";
 import {
+  buildRoomUrl,
   getClientOrigin,
   getRoomFromSearch,
   normalizeRoomInput,
@@ -501,10 +502,12 @@ export function useSocket() {
   }, [hasSubmitted, selections]);
 
   const copyRoomUrl = useCallback(async () => {
-    if (!roomUrl) return false;
-    await navigator.clipboard.writeText(roomUrl);
+    if (!room) return false;
+    const link = buildRoomUrl(room);
+    await navigator.clipboard.writeText(link);
+    setRoomUrl(link);
     return true;
-  }, [roomUrl]);
+  }, [room]);
 
   const reconnect = useCallback(() => {
     socketRef.current?.connect();

@@ -87,7 +87,15 @@ function parseJoinPayload(payload) {
   return { roomId: null, sessionId: null, playerName: null };
 }
 
-function buildRoomState(roomId, sessionId) {
+function resolveClientOrigin(socket) {
+  const fromHeader = socket?.handshake?.headers?.origin;
+  if (typeof fromHeader === "string" && fromHeader.trim()) {
+    return fromHeader.trim().replace(/\/$/, "");
+  }
+  return CLIENT_ORIGIN.replace(/\/$/, "");
+}
+
+function buildRoomState(roomId, sessionId, clientOrigin) {
   const room = getRoom(roomId);
   if (!room) return null;
 
@@ -97,12 +105,13 @@ function buildRoomState(roomId, sessionId) {
     room.status !== "waiting" &&
     Boolean(room.game?.submissions?.[sessionId]);
   const sub = submitted ? room.game.submissions[sessionId] : null;
+  const origin = clientOrigin || CLIENT_ORIGIN;
 
   return {
     room: roomId,
     members,
     maxMembers: MAX_PLAYERS,
-    url: buildRoomUrl(roomId, CLIENT_ORIGIN),
+    url: buildRoomUrl(roomId, origin),
     hostId: room.hostSessionId,
     isHost,
     status: room.status,
@@ -127,7 +136,8 @@ function emitRoomState(roomId) {
   for (const sessionId of room.playerOrder) {
     const socketId = room.sockets[sessionId];
     if (!socketId) continue;
-    const state = buildRoomState(roomId, sessionId);
+    const socket = io.sockets.sockets.get(socketId);
+    const state = buildRoomState(roomId, sessionId, resolveClientOrigin(socket));
     if (state) {
       io.to(socketId).emit("room:state", state);
     }
@@ -274,7 +284,8 @@ function joinSocketToRoom(socket, roomId, sessionId, playerName, ack) {
 
   const previous = getCurrentRoom(socket);
   if (previous === roomId && getSessionId(socket) === sessionId) {
-    const state = buildRoomState(roomId, sessionId);
+    const origin = resolveClientOrigin(socket);
+    const state = buildRoomState(roomId, sessionId, origin);
     syncPlayerGame(socket, roomId, sessionId);
     if (typeof ack === "function") ack({ ok: true, ...state });
     return;
@@ -305,7 +316,8 @@ function joinSocketToRoom(socket, roomId, sessionId, playerName, ack) {
     setPlayerName(roomId, sessionId, resolvedName);
   }
 
-  const state = buildRoomState(roomId, sessionId);
+  const origin = resolveClientOrigin(socket);
+  const state = buildRoomState(roomId, sessionId, origin);
 
   socket.emit("room:joined", state);
   socket.to(roomId).emit("room:user_joined", {
