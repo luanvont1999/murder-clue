@@ -1,0 +1,14 @@
+{
+  "name": "murder-clue",
+  "private": true,
+  "scripts": {
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build:client": "npm ci --prefix client && npm run build --prefix client",
+    "build:server": "npm ci --prefix server --omit=dev",
+    "build": "npm run build:client && npm run build:server",
+    "start": "node server/src/index.js",
+    "docker:build": "docker build -t murder-clue .",
+    "docker:run": "docker run --rm -p 4001:4001 -e CLIENT_ORIGIN=http://localhost:4001 murder-clue"
+  }
+}

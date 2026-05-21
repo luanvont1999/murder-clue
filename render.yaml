@@ -1,0 +1,16 @@
+# Render.com — deploy không Docker (Native Node)
+# Dashboard: New → Blueprint hoặc Web Service, trỏ repo này.
+
+services:
+  - type: web
+    name: murder-clue
+    runtime: node
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: CORS_ORIGIN
+        value: "*"
